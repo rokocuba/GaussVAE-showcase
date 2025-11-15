@@ -1,0 +1,58 @@
+# Conv1D VAE with 512D Latent + Beta=0 (Pure Autoencoder)
+# BIAS REDUCTION EXPERIMENT - Prove model capacity by enabling overfitting
+#
+# Strategy: Remove ALL regularization to test if architecture can fit training data
+# - Beta = 0 means NO KL penalty whatsoever
+# - Pure reconstruction optimization (autoencoder mode)
+# - Goal: Reduce training recon loss below 2.5 to prove model capacity
+#
+# Previous runs (all had posterior collapse or slow convergence):
+# - run_002 (256D, β=1.0): KL=0.06, Recon=3.16
+# - run_003 (512D, β=0.5): KL=0.07, Recon=3.13
+# - run_004 (512D, β=0.1): KL=0.18, Recon=3.10 (improvement but still slow)
+#
+# Expected results with β=0:
+# - Training recon loss: < 2.5 (target: < 2.0)
+# - Validation recon loss: < 2.8 (will overfit)
+# - KL loss: 0.5-1.0 (many dimensions active, but we don't care - no penalty)
+#
+# If this DOESN'T achieve recon < 2.5:
+# → Architecture is fundamentally limited (need PointNet/Transformer)
+#
+# If this DOES achieve recon < 2.5:
+# → Architecture is fine, can add regularization back gradually
+# → Next: Try β=0.01 or 0.005 to balance bias-variance
+
+experiment_name: "run_005_512d_beta0"
+
+model:
+  name: "conv1d_512d_beta0"
+  latent_dim: 512
+  encoder_filters: [32, 64, 128]
+  decoder_filters: [64, 32, 16]
+  dropout_rates: [0.1, 0.15, 0.2]
+
+training:
+  batch_size: 32
+  epochs: 100
+  learning_rate: 0.001
+  beta_warmup_epochs: 50  # Still ramp, but to 0 (effectively disabled)
+  max_beta: 0.0  # ← ZERO REGULARIZATION - Pure autoencoder
+  mixed_precision: true
+
+data:
+  train_dir: "data/delaunay/npz/train"
+  dev_dir: "data/delaunay/npz/dev"
+  test_dir: "data/delaunay/npz/test"
+  stats_path: "data/normalization_stats.npz"
+  shuffle_buffer: 1000
+
+callbacks:
+  checkpoint_every: 10
+  early_stopping_patience: 15
+  reduce_lr_patience: 5
+  reduce_lr_factor: 0.5
+  min_lr: 0.000001
+
+output_dir: "experiments/run_005_512d_beta0"
+seed: 42

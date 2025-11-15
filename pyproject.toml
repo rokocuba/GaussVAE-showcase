@@ -1,0 +1,24 @@
+[tool.pytest.ini_options]
+# Pytest configuration for GaussVAE project
+
+# Test paths
+testpaths = ["tests"]
+
+# Markers
+markers = [
+    "gpu: marks tests as requiring GPU (excluded from CI/CD, run manually only)",
+]
+
+# Default options
+addopts = [
+    "-v",  # Verbose output
+    "--strict-markers",  # Require all markers to be registered
+    "-m not gpu",  # By default, skip GPU tests
+]
+
+# Output
+console_output_style = "progress"
+
+# Logging
+log_cli = true
+log_cli_level = "INFO"

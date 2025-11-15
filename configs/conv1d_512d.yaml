@@ -1,0 +1,36 @@
+# Conv1D VAE with 512D Latent Space
+# Addressing posterior collapse from run_002 (256D latent)
+# Reduces compression ratio from 16:1 to 8:1
+
+experiment_name: "conv1d_512d_latent"
+
+model:
+  name: "conv1d"
+  latent_dim: 512  # ← DOUBLED from 256
+  encoder_filters: [32, 64, 128]
+  decoder_filters: [64, 32, 16]
+  dropout_rates: [0.1, 0.15, 0.2]
+
+training:
+  batch_size: 32
+  epochs: 100
+  learning_rate: 0.001
+  beta_warmup_epochs: 50  # Keep same warmup schedule
+  mixed_precision: true
+
+data:
+  train_dir: "data/delaunay/npz/train"
+  dev_dir: "data/delaunay/npz/dev"
+  test_dir: "data/delaunay/npz/test"
+  stats_path: "data/normalization_stats.npz"
+  shuffle_buffer: 1000
+
+callbacks:
+  checkpoint_every: 10
+  early_stopping_patience: 15
+  reduce_lr_patience: 5
+  reduce_lr_factor: 0.5
+  min_lr: 0.000001
+
+output_dir: "outputs/conv1d_512d"
+seed: 42

@@ -1,0 +1,107 @@
+# ResNet Conv1D VAE Configuration
+# Architecture: 5 encoder blocks + 5 decoder blocks with residual connections
+# Total parameters: ~8-10M (reduced from 18.5M to fit T4 memory)
+# Purpose: Address capacity limitation causing training plateau in run_005
+
+model:
+  name: resnet_conv1d_512d
+  latent_dim: 512
+  
+  # Encoder architecture (5 ResNet blocks) - REDUCED filter counts
+  encoder_filters:
+    - 32      # Was 64
+    - 64      # Was 128
+    - 128     # Was 256
+    - 256     # Was 512
+    - 256     # Was 512
+  
+  encoder_kernel_sizes:
+    - 5
+    - 5
+    - 5
+    - 5
+    - 5
+  
+  encoder_pool_sizes:
+    - 2
+    - 2
+    - 2
+    - 2
+    - null  # GlobalAveragePooling
+  
+  encoder_dropout_rates:
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+  
+  encoder_dense_units: 512  # Was 1024
+  encoder_dense_dropout: 0.0
+  
+  # Decoder architecture (5 ResNet blocks) - REDUCED from 7 blocks, smaller filters
+  decoder_filters:
+    - 256     # Was 512
+    - 128     # Was 512
+    - 64      # Was 256
+    - 32      # Was 128
+    - 16      # Was 64
+  
+  decoder_kernel_sizes:
+    - 5
+    - 5
+    - 5
+    - 5
+    - 5  # 5 blocks total
+  
+  decoder_upsample_sizes:
+    - 2
+    - 2
+    - 2
+    - 2
+    - null  # 5 blocks total
+  
+  decoder_dropout_rates:
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+  
+  decoder_dense_units:
+    - 512      # Was 1024
+    - 16384    # 32 * 512 = 16384 (was 2048, too small)
+  
+  decoder_reshape_target:
+    - 32       # 32 * 2^4 = 512 (correct for 4 upsampling layers)
+    - 512
+
+training:
+  batch_size: 16  # Reduced from 32 due to 18.5M param model size (OOM on T4)
+  epochs: 100
+  learning_rate: 0.001
+  
+  # Beta annealing settings
+  # Start with beta=0 (no KL pressure) to avoid posterior collapse
+  beta_warmup_epochs: 50
+  max_beta: 0.0  # Keep at 0 initially to test reconstruction capacity
+  
+  mixed_precision: false  # Disabled for initial testing to avoid loss scaling warnings
+
+data:
+  train_dir: data/delaunay/npz/train
+  dev_dir: data/delaunay/npz/dev
+  test_dir: data/delaunay/npz/test
+  stats_path: data/normalization_stats.npz
+  shuffle_buffer: 1000
+
+callbacks:
+  checkpoint_every: 10
+  early_stopping_patience: 15
+  reduce_lr_patience: 5
+  reduce_lr_factor: 0.5
+  min_lr: 1.0e-06
+
+output_dir: experiments/run_006_resnet_512d
+experiment_name: run_006_resnet_512d_beta0
+seed: 42

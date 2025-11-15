@@ -1,0 +1,64 @@
+# Dockerfile for Image-GS processing container
+# Full Image-GS environment with PyTorch and dependencies
+# Using devel image for CUDA compilation support
+FROM pytorch/pytorch:2.4.1-cuda12.4-cudnn9-devel
+
+# Set CUDA environment variables for compilation
+ENV CUDA_HOME=/usr/local/cuda
+ENV PATH=${CUDA_HOME}/bin:${PATH}
+ENV LD_LIBRARY_PATH=${CUDA_HOME}/lib64:${LD_LIBRARY_PATH}
+
+# Set working directory
+WORKDIR /workspace
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    git \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Image-GS Python dependencies
+# Based on third_party/image-gs/environment.yml
+RUN pip install --no-cache-dir \
+    lpips==0.1.4 \
+    matplotlib==3.9.2 \
+    numpy==2.0.2 \
+    pytorch-msssim==1.0.0 \
+    scikit-image==0.24.0 \
+    scipy==1.13.1 \
+    torchmetrics==1.5.2 \
+    Pillow \
+    pytest==8.3.2
+
+# NOTE: fused-ssim is skipped due to build issues with PyTorch 2.4+ (XPU detection problems)
+# Image-GS will automatically fall back to pytorch-msssim (installed above) which works fine
+# Performance difference is minimal for our use case
+
+# Install gsplat (Image-GS's custom CUDA rendering)
+# Set TORCH_CUDA_ARCH_LIST to avoid autodetection during build (no GPU visible)
+# Using common architectures: 7.5 (Turing), 8.0 (Ampere), 8.6 (Ampere), 9.0 (Hopper)
+COPY third_party/image-gs/gsplat /workspace/gsplat
+RUN cd /workspace/gsplat && \
+    TORCH_CUDA_ARCH_LIST="7.5;8.0;8.6;9.0" pip install -e . && \
+    python -c "import gsplat; print('gsplat installed:', gsplat.__file__)"
+
+# Copy image-gs source code
+COPY third_party/image-gs/ /workspace/third_party/image-gs/
+
+# Patch Image-GS to handle missing fused_ssim gracefully
+RUN python3 -c "import re; \
+content = open('/workspace/third_party/image-gs/model.py').read(); \
+content = content.replace('from fused_ssim import fused_ssim', '''try:\n    from fused_ssim import fused_ssim\n    HAS_FUSED_SSIM = True\nexcept ImportError:\n    HAS_FUSED_SSIM = False\n    from pytorch_msssim import ssim as fused_ssim'''); \
+open('/workspace/third_party/image-gs/model.py', 'w').write(content)"
+
+# Copy scripts directory
+COPY scripts/ /workspace/scripts/
+
+# Copy source code (needed for tests)
+COPY src/ /workspace/src/
+
+# Copy tests directory
+COPY tests/ /workspace/tests/
+
+# Default command (can be overridden by docker-compose)
+CMD ["python", "scripts/process_dataset.py"]

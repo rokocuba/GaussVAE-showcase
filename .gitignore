@@ -1,0 +1,19 @@
+# Ignore main data directory (large datasets)
+data/
+
+# But DO commit test data (small images for consistent testing across branches)
+!tests/data/
+tests/output/*
+experiments/
+.github/
+instructions/
+notebooks/
+!notebooks/08_vae_multi_image_demo.ipynb
+!notebooks/morton_sorting_visualization.png
+myproject.toml
+tests/
+scripts/
+!scripts/convert_checkpoints_to_npz.py
+!scripts/convert_npz_to_checkpoints.py
+!scripts/decode_gaussians.py
+!scripts/encode_gaussians.py

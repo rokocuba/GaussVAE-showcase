@@ -1,0 +1,76 @@
+version: '3.8'
+
+services:
+  # Step 1: Image-GS generates Gaussian representations from images
+  imagegs:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.gaussvae-imagegs
+    image: gaussvae-imagegs
+    runtime: nvidia
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+    volumes:
+      - ./data:/workspace/data
+      - ./third_party/image-gs:/workspace/third_party/image-gs
+      - ./src:/workspace/src
+      - ./tests:/workspace/tests
+      - ./scripts:/workspace/scripts
+    working_dir: /workspace/third_party/image-gs
+    # Keep container running for exec commands (tests, etc.)
+    # For image processing, use: docker-compose run imagegs python main.py --input_path /workspace/data/your_image.png ...
+    command: tail -f /dev/null
+
+  # Step 2a: VAE training (production)
+  vae:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.gaussvae-vae
+    image: gaussvae-vae
+    runtime: nvidia
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+    volumes:
+      - ./data:/workspace/data
+      - ./src:/workspace/src
+      - ./experiments:/workspace/experiments
+      - ./notebooks:/workspace/notebooks
+      - ./scripts:/workspace/scripts
+      - ./tests:/workspace/tests
+      - ./configs:/workspace/configs
+    working_dir: /workspace
+    # Keep container running for exec commands (tests, etc.)
+    # For training, use: docker-compose run vae python scripts/train_conv1d_vae.py --config configs/conv1d_base.yaml
+    command: tail -f /dev/null
+
+  # Step 2b: Jupyter Lab for VAE development
+  jupyter:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.gaussvae-vae
+    image: gaussvae-vae
+    runtime: nvidia
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+    volumes:
+      - ./data:/workspace/data
+      - ./src:/workspace/src
+      - ./experiments:/workspace/experiments
+      - ./notebooks:/workspace/notebooks
+      - ./scripts:/workspace/scripts
+      - ./tests:/workspace/tests
+      - ./configs:/workspace/configs
+    working_dir: /workspace
+    ports:
+      - "8888:8888"  # Jupyter Lab
+      - "6006:6006"  # TensorBoard
+      - "8081:8080"  # Netron (host:container)
+    command: >
+      conda run -n gaussvae --no-capture-output
+      jupyter lab
+      --ip=0.0.0.0
+      --port=8888
+      --no-browser
+      --allow-root
+      --NotebookApp.token=''
+      --NotebookApp.password=''

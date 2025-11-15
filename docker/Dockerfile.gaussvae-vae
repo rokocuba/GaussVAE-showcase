@@ -1,0 +1,81 @@
+# Dockerfile for VAE training container
+# Uses TensorFlow/Keras for neural network training with GPU support
+FROM nvidia/cuda:11.8.0-cudnn8-runtime-ubuntu22.04
+
+# Set working directory
+WORKDIR /workspace
+
+# Install system dependencies and miniconda
+RUN apt-get update && apt-get install -y \
+    git \
+    build-essential \
+    wget \
+    graphviz \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Miniconda
+RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /tmp/miniconda.sh && \
+    bash /tmp/miniconda.sh -b -p /opt/conda && \
+    rm /tmp/miniconda.sh
+
+ENV PATH=/opt/conda/bin:$PATH
+
+# Accept Anaconda Terms of Service (accept each channel separately)
+RUN conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/main && \
+    conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/r
+
+# Create a conda environment for VAE training
+RUN conda create -n gaussvae python=3.11 -y && \
+    conda clean -afy
+
+# Make RUN commands use the new environment
+SHELL ["conda", "run", "-n", "gaussvae", "/bin/bash", "-c"]
+
+# Install Python packages (TensorFlow, numpy, etc.)
+# Note: TensorFlow 2.12 is the last version built for CUDA 11.8
+# TensorFlow 2.13+ requires CUDA 12.x
+RUN pip install --no-cache-dir \
+    "tensorflow==2.12.*" \
+    numpy \
+    matplotlib \
+    scikit-learn \
+    tensorboard \
+    wandb \
+    tqdm \
+    pyyaml \
+    jupyter \
+    jupyterlab \
+    ipykernel \
+    pydot \
+    graphviz \
+    pytest \
+    pytest-cov \
+    pytest-xdist \
+    torch \
+    torchvision \
+    Pillow
+
+# Upgrade typing_extensions to fix IPython compatibility
+# TensorFlow 2.12 pins typing_extensions==4.5.0 but IPython needs >=4.6.0
+# Also install Netron for interactive model visualization
+RUN pip install --no-cache-dir --upgrade \
+    "typing_extensions>=4.6.0" \
+    netron
+
+# Register the conda environment as a Jupyter kernel
+RUN python -m ipykernel install --user --name=gaussvae --display-name="Python (gaussvae)"
+
+# Copy source code
+COPY src/ /workspace/src/
+
+# Set Python path so modules can be imported
+ENV PYTHONPATH=/workspace:$PYTHONPATH
+
+# Set the default conda environment
+ENV PATH /opt/conda/envs/gaussvae/bin:$PATH
+ENV CONDA_DEFAULT_ENV gaussvae
+
+# Default command (can be overridden by docker-compose)
+# Note: For actual training, use docker-compose or run with explicit script:
+#   docker-compose run vae python scripts/train_conv1d_vae.py --config configs/conv1d_base.yaml
+CMD ["conda", "run", "-n", "gaussvae", "bash"]

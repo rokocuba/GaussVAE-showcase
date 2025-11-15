@@ -1,0 +1,38 @@
+# Exclude large data directories from Docker build context
+data/delaunay/raw/
+data/delaunay/checkpoints/
+data/delaunay/npz/
+data/delaunay/downloads/
+data/delaunay/extracted/
+data/delaunay/image_gs_results/
+
+# Exclude Image-GS results/checkpoints (generated at runtime)
+third_party/image-gs/results/
+
+# Exclude test outputs
+tests/output/
+experiments/
+# Exclude notebook checkpoints
+**/.ipynb_checkpoints/
+
+# Exclude Python cache
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+**/*.pyd
+.Python
+
+# Exclude git
+.git/
+.gitignore
+
+# Exclude IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Exclude temporary files
+*.log
+tmp/
+temp/
