@@ -18,7 +18,7 @@ Building on this foundation, I hypothesized that variational autoencoders could 
 
 ## Architecture
 
-![VAE Architecture](notebooks/outputs/vae_complete_architecture.png)
+![VAE Architecture](notebooks/VAE_diagram.png)
 
 The system implements a two-stage compression pipeline:
 
