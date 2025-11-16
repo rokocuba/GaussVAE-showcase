@@ -12,8 +12,10 @@ notebooks/*
 !notebooks/morton_sorting_visualization.png
 myproject.toml
 tests/
-scripts/
+scripts/*
 !scripts/convert_checkpoints_to_npz.py
 !scripts/convert_npz_to_checkpoints.py
 !scripts/decode_gaussians.py
 !scripts/encode_gaussians.py
+!scripts/train_conv1d_vae.py
+!scripts/train_resnet_conv1d_vae.py
