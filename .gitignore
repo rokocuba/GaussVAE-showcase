@@ -10,7 +10,7 @@ instructions/
 notebooks/*
 !notebooks/08_vae_multi_image_demo.ipynb
 !notebooks/morton_sorting_visualization.png
-myproject.toml
+pyproject.toml
 tests/
 scripts/*
 !scripts/convert_checkpoints_to_npz.py
