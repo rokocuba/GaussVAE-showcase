@@ -43,6 +43,16 @@ services:
     # For training, use: docker-compose run vae python scripts/train_conv1d_vae.py --config configs/conv1d_base.yaml
     command: tail -f /dev/null
 
+  # TensorBoard only (lightweight, fast to build)
+  tensorboard:
+    image: tensorflow/tensorflow:2.12.0
+    volumes:
+      - ./experiments:/workspace/experiments
+    working_dir: /workspace
+    ports:
+      - "6006:6006"
+    command: tensorboard --logdir /workspace/experiments --bind_all
+
   # Step 2b: Jupyter Lab for VAE development
   jupyter:
     build:

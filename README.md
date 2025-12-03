@@ -52,6 +52,17 @@ Two architectures have been implemented and tested:
 
 Both networks process the spatially-sorted Gaussian parameters using 1D convolutions, treating the sequence of 512 Gaussians as a temporal signal.
 
+## Viewing Training Metrics
+
+To visualize training curves in TensorBoard:
+
+```bash
+# Start the tensorboard container (make sure port 6006 is free)
+docker-compose up tensorboard
+```
+
+Then open http://localhost:6006 in your browser.
+
 ## Current Results and Challenges
 
 As of November 16, 2025, the training results indicate significant challenges that require further investigation:
