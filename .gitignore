@@ -4,7 +4,10 @@ data/
 # But DO commit test data (small images for consistent testing across branches)
 !tests/data/
 tests/output/*
-experiments/
+experiments/*
+!experiments/run_006_resnet_512d
+checkpoints/
+variables/
 .github/
 instructions/
 notebooks/*

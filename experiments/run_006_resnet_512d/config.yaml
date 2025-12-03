@@ -1,0 +1,85 @@
+model:
+  name: resnet_conv1d_512d
+  latent_dim: 512
+  encoder_filters:
+  - 32
+  - 64
+  - 128
+  - 256
+  - 256
+  decoder_filters:
+  - 256
+  - 128
+  - 64
+  - 32
+  - 16
+  dropout_rates:
+  - 0.1
+  - 0.15
+  - 0.2
+  encoder_kernel_sizes:
+  - 5
+  - 5
+  - 5
+  - 5
+  - 5
+  decoder_kernel_sizes:
+  - 5
+  - 5
+  - 5
+  - 5
+  - 5
+  encoder_pool_sizes:
+  - 2
+  - 2
+  - 2
+  - 2
+  - null
+  decoder_upsample_sizes:
+  - 2
+  - 2
+  - 2
+  - 2
+  - null
+  encoder_dropout_rates:
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.0
+  decoder_dropout_rates:
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.0
+  encoder_dense_units: 512
+  encoder_dense_dropout: 0.0
+  decoder_dense_units:
+  - 512
+  - 16384
+  decoder_reshape_target:
+  - 32
+  - 512
+training:
+  batch_size: 16
+  epochs: 100
+  learning_rate: 0.001
+  beta_warmup_epochs: 50
+  max_beta: 0.0
+  mixed_precision: false
+data:
+  train_dir: data/delaunay/npz/train
+  dev_dir: data/delaunay/npz/dev
+  test_dir: data/delaunay/npz/test
+  stats_path: data/normalization_stats.npz
+  shuffle_buffer: 1000
+callbacks:
+  checkpoint_every: 10
+  early_stopping_patience: 15
+  reduce_lr_patience: 5
+  reduce_lr_factor: 0.5
+  min_lr: 1.0e-06
+output_dir: experiments/run_006_resnet_512d
+experiment_name: run_006_resnet_512d_beta0
+seed: 42
