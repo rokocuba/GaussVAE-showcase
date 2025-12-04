@@ -5,6 +5,9 @@ data/
 !tests/data/
 tests/output/*
 experiments/*
+!experiments/run_003_512d_beta0.5
+!experiments/run_004_512d_beta0.1
+!experiments/run_005_512d_beta0
 !experiments/run_006_resnet_512d
 checkpoints/
 variables/

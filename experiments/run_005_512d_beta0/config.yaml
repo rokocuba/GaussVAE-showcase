@@ -1,0 +1,37 @@
+model:
+  name: conv1d_512d_beta0
+  latent_dim: 512
+  encoder_filters:
+  - 32
+  - 64
+  - 128
+  decoder_filters:
+  - 64
+  - 32
+  - 16
+  dropout_rates:
+  - 0.1
+  - 0.15
+  - 0.2
+training:
+  batch_size: 32
+  epochs: 100
+  learning_rate: 0.001
+  beta_warmup_epochs: 50
+  max_beta: 0.0
+  mixed_precision: true
+data:
+  train_dir: data/delaunay/npz/train
+  dev_dir: data/delaunay/npz/dev
+  test_dir: data/delaunay/npz/test
+  stats_path: data/normalization_stats.npz
+  shuffle_buffer: 1000
+callbacks:
+  checkpoint_every: 10
+  early_stopping_patience: 15
+  reduce_lr_patience: 5
+  reduce_lr_factor: 0.5
+  min_lr: 1.0e-06
+output_dir: experiments/run_005_512d_beta0
+experiment_name: run_005_512d_beta0
+seed: 42
