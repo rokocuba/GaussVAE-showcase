@@ -71,7 +71,7 @@ The core idea was simple: apply Variational Autoencoders to compress Gaussian Sp
 
 I implemented Morton Z-order sorting (Z-curve) to linearize the 2D spatial distribution of the Gaussians. This preprocessing step ensures that spatially proximal Gaussians are also close in the 1D sequence fed into the network. This was crucial for the Conv1D layers to learn meaningful local features.
 
-*Relevant Notebook:* `notebooks/01_data_pipeline_test.ipynb`
+*Relevant Notebook:* [notebooks/01_data_pipeline_test.ipynb](notebooks/01_data_pipeline_test.ipynb)
 
 ### November 2025: First VAE Prototypes & KL Collapse
 
@@ -86,7 +86,7 @@ To isolate the reconstruction capability, I ran experiments where I effectively 
 
 These results suggested that the capacity of the initial models (256D/512D latent) might be insufficient for the complexity of the signal.
 
-*Relevant Notebook:* `notebooks/08_vae_multi_image_demo.ipynb`
+*Relevant Notebook:* [notebooks/08_vae_multi_image_demo.ipynb](notebooks/08_vae_multi_image_demo.ipynb)
 
 ### December 2025: Scaling Up & Weighted Losses
 
@@ -105,7 +105,7 @@ I also experimented with weighted losses, specifically trying to balance the rec
 
 My current hypothesis is that the decoder is the bottleneck. It might not be "strong" enough, or perhaps the Conv1D ResNet architecture is ill-suited for decoding this specific type of set data, even with Morton sorting. Apart from the obvious flaw of trying to use an autoencoder on an input that is fundamentally a set, the mapping from a latent vector back to a set of parameters with complex interdependencies remains a significant hurdle.
 
-*Relevant Notebook:* `notebooks/10_vae_minimal_demo_run012.ipynb`
+*Relevant Notebook:* [notebooks/10_vae_minimal_demo_run012.ipynb](notebooks/10_vae_minimal_demo_run012.ipynb)
 
 ## Experimental Setup
 

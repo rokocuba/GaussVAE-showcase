@@ -1,0 +1,90 @@
+model:
+  name: resnet_conv1d_2048d
+  latent_dim: 2048
+  encoder_filters:
+  - 32
+  - 64
+  - 128
+  - 256
+  - 512
+  decoder_filters:
+  - 512
+  - 256
+  - 128
+  - 64
+  - 32
+  dropout_rates:
+  - 0.1
+  - 0.15
+  - 0.2
+  encoder_kernel_sizes:
+  - 5
+  - 5
+  - 5
+  - 5
+  - 5
+  decoder_kernel_sizes:
+  - 5
+  - 5
+  - 5
+  - 5
+  - 5
+  encoder_pool_sizes:
+  - 2
+  - 2
+  - 2
+  - 2
+  - null
+  decoder_upsample_sizes:
+  - 2
+  - 2
+  - 2
+  - 2
+  - null
+  encoder_dropout_rates:
+  - 0.05
+  - 0.05
+  - 0.02
+  - 0.02
+  - 0.01
+  decoder_dropout_rates:
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.0
+  encoder_dense_units: 2048
+  encoder_dense_dropout: 0.02
+  decoder_dense_units:
+  - 2048
+  - 16384
+  decoder_reshape_target:
+  - 32
+  - 512
+training:
+  batch_size: 16
+  epochs: 500
+  learning_rate: 0.0005
+  beta_warmup_epochs: 80
+  max_beta: 0.8
+  mixed_precision: false
+data:
+  train_dir: data/delaunay/npz/train
+  dev_dir: data/delaunay/npz/dev
+  test_dir: data/delaunay/npz/test
+  stats_path: data/normalization_stats.npz
+  shuffle_buffer: 800
+callbacks:
+  checkpoint_every: 10
+  early_stopping_patience: 50
+  reduce_lr_patience: 15
+  reduce_lr_factor: 0.7
+  min_lr: 1.0e-06
+loss_weights:
+  xy_weight: 0.6
+  scale_weight: 1.0
+  rot_weight: 4.0
+  feat_weight: 4.0
+output_dir: experiments/run_010_resnet_2048d_kl
+experiment_name: run_010_resnet_2048d_kl
+seed: 43

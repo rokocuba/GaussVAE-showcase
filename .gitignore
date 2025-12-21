@@ -9,12 +9,16 @@ experiments/*
 !experiments/run_004_512d_beta0.1
 !experiments/run_005_512d_beta0
 !experiments/run_006_resnet_512d
+!experiments/run_012_2048d_finetune
+!experiments/run_011_2048d_finetune
+!experiments/run_010_resnet_2048d_kl
 checkpoints/
 variables/
 .github/
 instructions/
 notebooks/*
 !notebooks/08_vae_multi_image_demo.ipynb
+!notebooks/10_vae_minimal_demo_run012.ipynb
 !notebooks/morton_sorting_visualization.png
 pyproject.toml
 tests/
