@@ -106,6 +106,14 @@ def train_conv1d_vae(
     if verbose >= 1:
         print("Creating Conv1D VAE model...")
     
+    # Extract loss weights from config
+    loss_weights = {
+        'xy': config.loss_weights.xy_weight,
+        'scale': config.loss_weights.scale_weight,
+        'rot': config.loss_weights.rot_weight,
+        'feat': config.loss_weights.feat_weight,
+    }
+    
     model = Conv1DVAE(
         input_shape=(512, 8),
         latent_dim=config.model.latent_dim,
@@ -113,6 +121,7 @@ def train_conv1d_vae(
         decoder_filters=config.model.decoder_filters,
         encoder_dropout_rates=config.model.dropout_rates,
         beta=0.0,  # Will be set to proper value by BetaAnnealingCallback at epoch start
+        loss_weights=loss_weights,
         name=config.model.name,
     )
     
@@ -121,6 +130,7 @@ def train_conv1d_vae(
     
     if verbose >= 1:
         print(f"✓ Model created: {model.count_params():,} parameters")
+        print(f"✓ Loss weights: xy={loss_weights['xy']:.3f}, scale={loss_weights['scale']:.3f}, rot={loss_weights['rot']:.3f}, feat={loss_weights['feat']:.3f}")
         if verbose >= 2:
             model.summary()
         print()

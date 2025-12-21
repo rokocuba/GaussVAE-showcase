@@ -85,6 +85,7 @@ class Conv1DVAE(BaseVAE):
         decoder_upsample_sizes: List[Optional[int]] = [2, 2, None],
         encoder_dropout_rates: List[float] = [0.1, 0.15, 0.2],
         beta: float = 1.0,
+        loss_weights=None,
         **kwargs
     ):
         """Initialize Conv1D VAE with architecture parameters."""
@@ -104,6 +105,7 @@ class Conv1DVAE(BaseVAE):
         # Initialize base VAE (will call build_encoder/build_decoder)
         super().__init__(
             latent_dim=latent_dim,
+            loss_weights=loss_weights,
             **kwargs
         )
         

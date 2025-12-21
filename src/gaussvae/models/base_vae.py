@@ -39,18 +39,33 @@ class BaseVAE(keras.Model, ABC):
         >>> vae = MyVAE(latent_dim=256)
     """
     
-    def __init__(self, latent_dim=256, name='vae', **kwargs):
+    def __init__(self, latent_dim=256, loss_weights=None, name='vae', **kwargs):
         """
         Initialize base VAE.
         
         Args:
             latent_dim: Dimensionality of latent space
+            loss_weights: Dictionary with loss weights for each parameter type.
+                         Keys: 'xy', 'scale', 'rot', 'feat'
+                         If None, defaults to per-channel normalization:
+                         xy=0.5, scale=0.5, rot=1.0, feat=0.333
             name: Model name
             **kwargs: Additional arguments passed to keras.Model
         """
         super().__init__(name=name, **kwargs)
         
         self.latent_dim = latent_dim
+        
+        # Loss weights (default to per-channel normalization)
+        if loss_weights is None:
+            self.loss_weights = {
+                'xy': 1.0,
+                'scale': 1.0,
+                'rot': 1.0,
+                'feat': 1.0,
+            }
+        else:
+            self.loss_weights = loss_weights
         
         # Beta for KL divergence weighting (will be updated by callback)
         # Start at 1.0 by default (standard VAE)
@@ -124,8 +139,14 @@ class BaseVAE(keras.Model, ABC):
         loss_rot = tf.reduce_mean(tf.square(data[:, :, 4:5] - reconstruction[:, :, 4:5]))
         loss_feat = tf.reduce_mean(tf.square(data[:, :, 5:8] - reconstruction[:, :, 5:8]))
         
-        # Total reconstruction loss (equal weights for now)
-        reconstruction_loss = loss_xy + loss_scale + loss_rot + loss_feat
+        # Per-channel weighted loss (weight inversely by number of channels)
+        # This ensures each parameter TYPE contributes equally to the gradient
+        loss_xy_weighted = loss_xy * self.loss_weights['xy']
+        loss_scale_weighted = loss_scale * self.loss_weights['scale']
+        loss_rot_weighted = loss_rot * self.loss_weights['rot']
+        loss_feat_weighted = loss_feat * self.loss_weights['feat']
+        
+        reconstruction_loss = loss_xy_weighted + loss_scale_weighted + loss_rot_weighted + loss_feat_weighted
         
         # Return both total loss and per-parameter breakdown
         loss_dict = {

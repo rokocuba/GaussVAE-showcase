@@ -121,6 +121,14 @@ def train_resnet_conv1d_vae(
     decoder_dense_units = getattr(config.model, 'decoder_dense_units', [1024, 4096])
     decoder_reshape_target = getattr(config.model, 'decoder_reshape_target', (8, 512))
     
+    # Extract loss weights from config
+    loss_weights = {
+        'xy': config.loss_weights.xy_weight,
+        'scale': config.loss_weights.scale_weight,
+        'rot': config.loss_weights.rot_weight,
+        'feat': config.loss_weights.feat_weight,
+    }
+    
     model = ResNetConv1DVAE(
         input_shape=(512, 8),
         latent_dim=config.model.latent_dim,
@@ -137,6 +145,7 @@ def train_resnet_conv1d_vae(
         decoder_dense_units=decoder_dense_units,
         decoder_reshape_target=decoder_reshape_target,
         beta=0.0,  # Will be set to proper value by BetaAnnealingCallback at epoch start
+        loss_weights=loss_weights,
         name=config.model.name,
     )
     
@@ -145,6 +154,7 @@ def train_resnet_conv1d_vae(
     
     if verbose >= 1:
         print(f"✓ Model created: {model.count_params():,} parameters")
+        print(f"✓ Loss weights: xy={loss_weights['xy']:.3f}, scale={loss_weights['scale']:.3f}, rot={loss_weights['rot']:.3f}, feat={loss_weights['feat']:.3f}")
         if verbose >= 2:
             model.summary()
         print()
@@ -190,17 +200,18 @@ def train_resnet_conv1d_vae(
         
         # Model checkpointing (save best N models)
         tf.keras.callbacks.ModelCheckpoint(
-            filepath=str(output_path / 'checkpoints' / 'vae_epoch_{epoch:03d}'),
-            monitor='val_total_loss',
+            filepath=str(output_path / 'checkpoints' / 'best'),
+            monitor='val_recon_loss',
             save_best_only=True,
             save_weights_only=False,
             mode='min',
             verbose=(1 if verbose >= 1 else 0),
         ),
+
         
         # Early stopping
         tf.keras.callbacks.EarlyStopping(
-            monitor='val_total_loss',
+            monitor='val_recon_loss',
             patience=config.callbacks.early_stopping_patience,
             restore_best_weights=True,
             verbose=(1 if verbose >= 1 else 0),
@@ -208,7 +219,7 @@ def train_resnet_conv1d_vae(
         
         # Reduce learning rate on plateau
         tf.keras.callbacks.ReduceLROnPlateau(
-            monitor='val_total_loss',
+            monitor='val_recon_loss',
             factor=config.callbacks.reduce_lr_factor,
             patience=config.callbacks.reduce_lr_patience,
             min_lr=config.callbacks.min_lr,

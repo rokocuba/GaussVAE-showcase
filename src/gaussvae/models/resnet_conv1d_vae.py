@@ -105,6 +105,7 @@ class ResNetConv1DVAE(BaseVAE):
         decoder_dense_units: List[int] = [1024, 4096],
         decoder_reshape_target: Tuple[int, int] = (8, 512),
         beta: float = 1.0,
+        loss_weights=None,
         **kwargs
     ):
         """Initialize ResNet Conv1D VAE with architecture parameters."""
@@ -131,6 +132,7 @@ class ResNetConv1DVAE(BaseVAE):
         # Initialize base VAE (will call build_encoder/build_decoder)
         super().__init__(
             latent_dim=latent_dim,
+            loss_weights=loss_weights,
             **kwargs
         )
         

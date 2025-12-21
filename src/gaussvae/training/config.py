@@ -75,12 +75,31 @@ class CallbacksConfig:
 
 
 @dataclass
+class LossWeightsConfig:
+    """Loss weighting configuration for multi-parameter reconstruction.
+    
+    Default values implement per-channel normalization: weight inversely by
+    number of channels so each parameter TYPE contributes equally to gradients.
+    
+    - xy_weight=1.0: XY position (2 channels)
+    - scale_weight=1.0: Ellipse scale (2 channels)
+    - rot_weight=1.0: Rotation angle (1 channel)
+    - feat_weight=1.0: RGB features (3 channels)
+    """
+    xy_weight: float = 1.0
+    scale_weight: float = 1.0
+    rot_weight: float = 1.0
+    feat_weight: float = 1.0
+
+
+@dataclass
 class VAEConfig:
     """Complete VAE training configuration."""
     model: ModelConfig = field(default_factory=ModelConfig)
     training: TrainingConfig = field(default_factory=TrainingConfig)
     data: DataConfig = field(default_factory=DataConfig)
     callbacks: CallbacksConfig = field(default_factory=CallbacksConfig)
+    loss_weights: LossWeightsConfig = field(default_factory=LossWeightsConfig)
     output_dir: str = "outputs/vae_training"
     experiment_name: Optional[str] = None
     seed: Optional[int] = None
@@ -112,12 +131,14 @@ class VAEConfig:
         training_config = TrainingConfig(**yaml_dict.get('training', {}))
         data_config = DataConfig(**yaml_dict.get('data', {}))
         callbacks_config = CallbacksConfig(**yaml_dict.get('callbacks', {}))
+        loss_weights_config = LossWeightsConfig(**yaml_dict.get('loss_weights', {}))
 
         return cls(
             model=model_config,
             training=training_config,
             data=data_config,
             callbacks=callbacks_config,
+            loss_weights=loss_weights_config,
             output_dir=yaml_dict.get('output_dir', 'outputs/vae_training'),
             experiment_name=yaml_dict.get('experiment_name'),
             seed=yaml_dict.get('seed'),
@@ -138,12 +159,14 @@ class VAEConfig:
         training_config = TrainingConfig(**config_dict.get('training', {}))
         data_config = DataConfig(**config_dict.get('data', {}))
         callbacks_config = CallbacksConfig(**config_dict.get('callbacks', {}))
+        loss_weights_config = LossWeightsConfig(**config_dict.get('loss_weights', {}))
 
         return cls(
             model=model_config,
             training=training_config,
             data=data_config,
             callbacks=callbacks_config,
+            loss_weights=loss_weights_config,
             output_dir=config_dict.get('output_dir', 'outputs/vae_training'),
             experiment_name=config_dict.get('experiment_name'),
             seed=config_dict.get('seed'),
@@ -156,6 +179,7 @@ class VAEConfig:
             'training': asdict(self.training),
             'data': asdict(self.data),
             'callbacks': asdict(self.callbacks),
+            'loss_weights': asdict(self.loss_weights),
             'output_dir': self.output_dir,
             'experiment_name': self.experiment_name,
             'seed': self.seed,
