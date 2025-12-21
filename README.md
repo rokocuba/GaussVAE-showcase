@@ -63,31 +63,49 @@ docker-compose up tensorboard
 
 Then open http://localhost:6006 in your browser.
 
-## Current Results and Challenges
+## Monthly Reports
 
-As of November 16, 2025, the training results indicate significant challenges that require further investigation:
+### October 2025: The Initial Concept & Data Sorting
 
-**Primary Issue: High Reconstruction Bias**
+The core idea was simple: apply Variational Autoencoders to compress Gaussian Splatting representations. Since Gaussian Splats are fundamentally sets of unordered primitives, applying standard convolutional architectures is non-trivial. My first step was to impose a spatial ordering on the Gaussians to make them amenable to 1D convolutions.
 
-The current models exhibit high bias in reconstruction, particularly affecting rotation and color feature parameters. Analysis of six training runs (runs 002-006) reveals the following patterns:
+I implemented Morton Z-order sorting (Z-curve) to linearize the 2D spatial distribution of the Gaussians. This preprocessing step ensures that spatially proximal Gaussians are also close in the 1D sequence fed into the network. This was crucial for the Conv1D layers to learn meaningful local features.
+
+*Relevant Notebook:* `notebooks/01_data_pipeline_test.ipynb`
+
+### November 2025: First VAE Prototypes & KL Collapse
+
+I began training the first VAE models (runs 002-006). The initial results showed a common failure mode in VAE training: posterior collapse. The KL divergence term would vanish, effectively turning the VAE into a standard autoencoder but with a useless latent space.
+
+To isolate the reconstruction capability, I ran experiments where I effectively shut down the KL loss (setting $\beta=0$ or very low). This allowed me to verify if the architecture could compress and reconstruct the data at all. The results indicated a high bias in reconstruction, particularly affecting rotation and color feature parameters:
 
 - Position (xy) parameters: Loss converges to ~0.1 (acceptable)
-- Scale parameters: Loss converges to ~0.2 (acceptable)  
+- Scale parameters: Loss converges to ~0.2 (acceptable)
 - Rotation parameters: Loss plateaus at ~1.0-1.2 (poor)
 - Color features: Loss plateaus at ~1.0 (poor)
 
-**Visual Results:**
+These results suggested that the capacity of the initial models (256D/512D latent) might be insufficient for the complexity of the signal.
 
-For detailed reconstruction visualizations and quantitative comparisons, see `notebooks/08_vae_multi_image_demo.ipynb` in the [notebooks](https://github.com/rokocuba/GaussVae-showcase/blob/main/notebooks/08_vae_multi_image_demo.ipynb).
+*Relevant Notebook:* `notebooks/08_vae_multi_image_demo.ipynb`
 
-**Ongoing Experiments:**
+### December 2025: Scaling Up & Weighted Losses
 
-I am currently investigating loss weighting strategies and architectural modifications to address these imbalances. Additional experiments will explore:
-- Alternative loss formulations (perceptual losses, adversarial training)
-- Increased model capacity and training duration
-- Curriculum learning strategies (progressive complexity increase)
+For this month, I significantly scaled up the architecture. I hypothesized that the previous models simply lacked the capacity to capture the high-frequency details of the Gaussian parameters. I expanded the latent dimension to 2048, aiming for a 2x compression ratio.
 
-The project remains in early-stage development, and these challenges are expected in novel applications of established techniques. I am committed to systematic experimentation to identify effective solutions.
+I implemented a much "chunkier" ResNet-based architecture:
+
+**Model Parameter Counts:**
+```text
+Total parameters: 54,207,063
+Encoder parameters: 12,246,304 (22.6%)
+Decoder parameters: 41,911,848 (77.3%)
+```
+
+I also experimented with weighted losses, specifically trying to balance the reconstruction terms for position (xy), rotation, scale, and features (color). Despite training for over 500 epochs, the losses for rotation, scale, and features struggled to converge.
+
+My current hypothesis is that the decoder is the bottleneck. It might not be "strong" enough, or perhaps the Conv1D ResNet architecture is ill-suited for decoding this specific type of set data, even with Morton sorting. Apart from the obvious flaw of trying to use an autoencoder on an input that is fundamentally a set, the mapping from a latent vector back to a set of parameters with complex interdependencies remains a significant hurdle.
+
+*Relevant Notebook:* `notebooks/10_vae_minimal_demo_run012.ipynb`
 
 ## Experimental Setup
 
