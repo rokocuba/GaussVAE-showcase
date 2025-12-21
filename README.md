@@ -43,12 +43,12 @@ Two architectures have been implemented and tested:
 - Activation: ReLU throughout
 - Loss: MSE reconstruction + β-weighted KL divergence with linear annealing
 
-**2. ResNet Conv1D VAE (~16M parameters):**
-- Encoder: Five ResNet blocks with residual connections (32 → 256 filters)
-- Latent space: 512 dimensions
-- Decoder: Five ResNet blocks with residual connections (256 → 16 filters)
+**2. ResNet Conv1D VAE (Scaled Up - ~54M parameters):**
+- Encoder: Deep ResNet blocks with residual connections (up to 512 filters)
+- Latent space: 2048 dimensions
+- Decoder: High-capacity ResNet decoder (~42M parameters)
 - Improved gradient flow via skip connections
-- Same loss formulation as baseline
+- Weighted loss formulation to balance reconstruction terms
 
 Both networks process the spatially-sorted Gaussian parameters using 1D convolutions, treating the sequence of 512 Gaussians as a temporal signal.
 
@@ -70,8 +70,6 @@ Then open http://localhost:6006 in your browser.
 The core idea was simple: apply Variational Autoencoders to compress Gaussian Splatting representations. Since Gaussian Splats are fundamentally sets of unordered primitives, applying standard convolutional architectures is non-trivial. My first step was to impose a spatial ordering on the Gaussians to make them amenable to 1D convolutions.
 
 I implemented Morton Z-order sorting (Z-curve) to linearize the 2D spatial distribution of the Gaussians. This preprocessing step ensures that spatially proximal Gaussians are also close in the 1D sequence fed into the network. This was crucial for the Conv1D layers to learn meaningful local features.
-
-*Relevant Notebook:* [notebooks/01_data_pipeline_test.ipynb](notebooks/01_data_pipeline_test.ipynb)
 
 ### November 2025: First VAE Prototypes & KL Collapse
 
