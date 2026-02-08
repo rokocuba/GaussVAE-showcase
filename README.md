@@ -105,7 +105,7 @@ My current hypothesis is that the decoder is the bottleneck. It might not be "st
 
 *Relevant Notebook:* [notebooks/10_vae_minimal_demo_run012.ipynb](notebooks/10_vae_minimal_demo_run012.ipynb)
 
-### January: Revision
+### January 2026: Revision
 
 Project activity was briefly paused to prioritize academic obligations. Further plans include scaling down the scope by encoding Gaussians for a new, more specific dataset (e.g., hand gestures). I will start experimenting with new set-based architectures. These will likely incorporate Chamfer loss and attention mechanisms in the encoder.
 
