@@ -105,6 +105,10 @@ My current hypothesis is that the decoder is the bottleneck. It might not be "st
 
 *Relevant Notebook:* [notebooks/10_vae_minimal_demo_run012.ipynb](notebooks/10_vae_minimal_demo_run012.ipynb)
 
+### January: Revision
+
+Project activity was briefly paused to prioritize academic obligations. Further plans include scaling down the scope by encoding Gaussians for a new, more specific dataset (e.g., hand gestures). We will start experimenting with new set-based architectures. These will incorporate Chamfer loss and attention mechanisms in the encoder.
+
 ## Experimental Setup
 
 **Hardware:** Google Cloud Compute Engine VM with NVIDIA Tesla T4 GPU (16GB VRAM)  
