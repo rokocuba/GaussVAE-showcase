@@ -109,6 +109,9 @@ My current hypothesis is that the decoder is the bottleneck. It might not be "st
 
 Project activity was briefly paused to prioritize academic obligations. Further plans include scaling down the scope by encoding a new, more specific dataset (e.g., hand gestures) with fewer Gaussian splats. I will start experimenting with new set-based architectures. These will likely incorporate Chamfer loss and attention mechanisms in the encoder.
 
+### February 2026: Pivoting for My Final Thesis
+I am shifting my focus to explore Variational Autoencoders more fundamentally for my final thesis. This foundational work will enable me to tackle the GaussVAE project more seriously in the future. My new objective is to dynamically optimize VAE reconstruction loss using Shapley value estimations on a smaller, proven model, which you can track at [shapley-guided-vae](https://github.com/rokocuba/shapley-guided-vae).
+
 ## Experimental Setup
 
 **Hardware:** Google Cloud Compute Engine VM with NVIDIA Tesla T4 GPU (16GB VRAM)  
